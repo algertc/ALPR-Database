@@ -60,12 +60,12 @@ export async function POST(request) {
   try {
     const { headers } = await request.json();
     const forwardedFor = headers["x-forwarded-for"];
-
     if (!forwardedFor) {
       console.warn("No X-Forwarded-For header present");
       return NextResponse.json({ allowed: false });
     }
 
+    // Get the client IP from X-Forwarded-For header
     const clientIP = getClientIP(forwardedFor);
     if (!clientIP) {
       console.warn("No valid IP found in X-Forwarded-For header");
@@ -76,17 +76,20 @@ export async function POST(request) {
 
     // Load the configuration data
     const config = await getConfig();
+    const whitelist = config.homeassistant?.whitelist || [];
 
-    if (
-      !config.homeassistant?.whitelist ||
-      config.homeassistant?.whitelist.length === 0
-    ) {
+    if (whitelist.length === 0) {
+      console.warn("No whitelisted IPs configured");
       return NextResponse.json({ allowed: false });
     }
 
-    // Normalize all whitelisted IPs for comparison
-    const whitelistedIps = config.homeassistant.whitelist.map(normalizeIP);
-    const isAllowedIp = whitelistedIps.includes(clientIP);
+    // Normalize all whitelist IPs and compare
+    const normalizedWhitelist = whitelist.map(normalizeIP);
+    const isAllowedIp = normalizedWhitelist.includes(normalizeIP(clientIP));
+
+    if (!isAllowedIp) {
+      console.warn(`IP ${clientIP} is not in the whitelist`);
+    }
 
     return NextResponse.json({ allowed: isAllowedIp });
   } catch (error) {
@@ -94,3 +97,4 @@ export async function POST(request) {
     return NextResponse.json({ allowed: false }, { status: 500 });
   }
 }
+
