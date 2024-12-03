@@ -92,16 +92,16 @@ export async function POST(request) {
 
     console.log("Raw x-forwarded-for header:", forwardedFor);
 
-    if (!forwardedFor) {
-      console.warn("No X-Forwarded-For header present");
-      return NextResponse.json({ allowed: false });
-    }
-
     // Log the split IPs before processing
     console.log(
       "Split IPs:",
       forwardedFor.split(",").map((ip) => ip.trim())
     );
+
+    if (!forwardedFor) {
+      console.warn("No X-Forwarded-For header present");
+      return NextResponse.json({ allowed: false });
+    }
 
     return NextResponse.json({ allowed: isAllowedIp });
   } catch (error) {
