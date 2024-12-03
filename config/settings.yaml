@@ -1,0 +1,23 @@
+general:
+  maxRecords: 2000
+  ignoreNonPlate: false
+mqtt:
+  broker: ''
+  topic: alpr/plates
+database:
+  host: 192.168.1.61:5432
+  name: postgres
+  user: postgres
+  password: password
+notifications:
+  pushover:
+    enabled: false
+    app_token: ''
+    user_key: ''
+    priority: 1
+    sound: pushover
+    title: ALPR Alert
+homeassistant:
+  enabled: true
+  whitelist:
+    - 192.168.1.206
