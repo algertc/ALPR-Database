@@ -1092,7 +1092,7 @@ export default function PlateTable() {
 
       {/* Dialogs */}
       <Dialog open={isAddKnownPlateOpen} onOpenChange={setIsAddKnownPlateOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Edit Known Plate</DialogTitle>
             <DialogDescription>
@@ -1100,23 +1100,18 @@ export default function PlateTable() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="name"
-                className="text-right sm:text-left col-span-4 sm:col-span-1"
-              >
-                Name
-              </Label>
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
                 value={newKnownPlate.name}
                 onChange={(e) =>
                   setNewKnownPlate({ ...newKnownPlate, name: e.target.value })
                 }
-                className="col-span-4 sm:col-span-3"
+                className="w-full"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="space-y-2">
               <Label
                 htmlFor="notes"
                 className="text-right sm:text-left col-span-4 sm:col-span-1"

@@ -6,7 +6,6 @@ import { loginAction } from "@/app/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Shield, Loader2 } from "lucide-react";
-import Image from "next/image";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -25,7 +24,7 @@ export default function LoginPage() {
         if (result.error) {
           setError(result.error);
         } else if (result.success) {
-          router.push("/dashboard");
+          router.push("/");
         }
       } catch (e) {
         setError("An error occurred during login");
@@ -59,7 +58,22 @@ export default function LoginPage() {
 
         <div className="bg-card border border-border rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 sm:p-8">
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 sm:space-y-6"
+              autoComplete="on"
+            >
+              {/* Hidden username field for better password manager support */}
+              <input
+                type="text"
+                name="username"
+                value="admin"
+                autoComplete="username"
+                style={{ display: "none" }}
+                readOnly
+                tabIndex={-1}
+              />
+
               <div className="space-y-2">
                 <Input
                   id="password"

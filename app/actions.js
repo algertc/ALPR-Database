@@ -88,10 +88,15 @@ export async function handleDeleteTag(tagName) {
   return await dbDeleteTag(tagName);
 }
 
-export async function getDashboardMetrics(timeZone, startDate, endDate) {
+export async function getDashboardMetrics(
+  timeZone,
+  startDate,
+  endDate,
+  cameraName
+) {
   console.log("Fetching dashboard metrics");
   try {
-    const metrics = await getMetrics(startDate, endDate);
+    const metrics = await getMetrics(startDate, endDate, cameraName);
 
     // Pre-initialize the hourCounts array
     const hourCounts = new Array(24).fill(0);
@@ -577,6 +582,7 @@ export async function updateNotificationPriority(formData) {
 export async function loginAction(formData) {
   console.log("Logging in user");
   const password = formData.get("password");
+
   if (!password) {
     return { error: "Password is required" };
   }
@@ -590,8 +596,12 @@ export async function loginAction(formData) {
       return { error: "Invalid password" };
     }
 
-    // Create new session
-    const sessionId = await createSession();
+    // Get user agent properly in Next.js 15
+    const headersList = await headers();
+    const userAgent = headersList.get("user-agent") || "Unknown Device";
+
+    // Create new session with user agent
+    const sessionId = await createSession(userAgent);
     console.log("Created session ID:", sessionId);
 
     // Set cookie

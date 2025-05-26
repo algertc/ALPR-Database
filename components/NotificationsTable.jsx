@@ -51,6 +51,7 @@ export function NotificationsTable({ initialData }) {
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [plateToDelete, setPlateToDelete] = useState(null);
   const [testStatus, setTestStatus] = useState(null);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -63,6 +64,7 @@ export function NotificationsTable({ initialData }) {
     if (result) {
       setData((prev) => [result, ...prev]);
       setNewPlate("");
+      setIsAddDialogOpen(false);
     }
   };
 
@@ -152,9 +154,9 @@ export function NotificationsTable({ initialData }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="py-4">
+      <div className="py-2">
         {/* Responsive form layout */}
-        <form
+        {/* <form
           onSubmit={handleAdd}
           className="flex flex-col sm:flex-row gap-2 mb-4"
         >
@@ -170,7 +172,53 @@ export function NotificationsTable({ initialData }) {
           <Button type="submit" className="w-full sm:w-auto">
             Create Notification
           </Button>
-        </form>
+        </form> */}
+        <div className="flex justify-end items-center">
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            className="mb-4 w-fit"
+          >
+            Add Notification Plate
+          </Button>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Add Notification Plate</DialogTitle>
+                <DialogDescription>
+                  Enter a license plate number to receive notifications when
+                  it's detected.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAdd}>
+                <div className="py-4">
+                  <Input
+                    placeholder="Enter plate number..."
+                    value={newPlate}
+                    onChange={(e) => setNewPlate(e.target.value.toUpperCase())}
+                    className="w-full"
+                    autoFocus
+                  />
+                </div>
+                <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsAddDialogOpen(false)}
+                    className="w-full sm:w-auto order-2 sm:order-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="w-full sm:w-auto order-1 sm:order-2"
+                  >
+                    Add Plate
+                  </Button>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
 
         {testStatus && (
           <Alert

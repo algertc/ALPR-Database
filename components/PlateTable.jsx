@@ -426,6 +426,10 @@ export default function PlateTable({
     formData.append("removePrevious", correction.removePlate.toString());
 
     await onCorrectPlate(formData);
+    setSelectedImage((prev) => ({
+      ...prev,
+      plateNumber: correction.newPlateNumber,
+    }));
     setCorrection(null);
     setIsCorrectPlateOpen(false);
   };
@@ -1779,31 +1783,27 @@ export default function PlateTable({
           open={isAddKnownPlateOpen}
           onOpenChange={setIsAddKnownPlateOpen}
         >
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Add to Known Plates</DialogTitle>
               <DialogDescription>
                 Add details for the plate {activePlate?.plate_number}
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
+            <div className="flex flex-col gap-4 py-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
                   value={newKnownPlate.name}
                   onChange={(e) =>
                     setNewKnownPlate({ ...newKnownPlate, name: e.target.value })
                   }
-                  className="col-span-3"
+                  placeholder="Enter name"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="notes" className="text-right">
-                  Notes
-                </Label>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="notes">Notes</Label>
                 <Textarea
                   id="notes"
                   value={newKnownPlate.notes}
@@ -1813,7 +1813,8 @@ export default function PlateTable({
                       notes: e.target.value,
                     })
                   }
-                  className="col-span-3"
+                  placeholder="Additional notes or details"
+                  rows={3}
                 />
               </div>
             </div>
@@ -1864,7 +1865,7 @@ export default function PlateTable({
           open={correction !== null}
           onOpenChange={(open) => !open && setCorrection(null)}
         >
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Correct Plate Number</DialogTitle>
               <DialogDescription>
@@ -1872,21 +1873,17 @@ export default function PlateTable({
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="current-plate" className="text-right">
-                  Current
-                </Label>
+              <div className="grid items-center gap-4">
+                <Label htmlFor="current-plate">Current</Label>
                 <Input
                   id="current-plate"
                   value={correction?.plateNumber || ""}
                   disabled
-                  className="col-span-3 font-mono"
+                  className="font-mono"
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="new-plate" className="text-right">
-                  New
-                </Label>
+              <div className="grid items-center gap-4 mb-4">
+                <Label htmlFor="new-plate">New</Label>
                 <Input
                   id="new-plate"
                   value={correction?.newPlateNumber || ""}
@@ -1896,7 +1893,7 @@ export default function PlateTable({
                       newPlateNumber: e.target.value.toUpperCase(),
                     }))
                   }
-                  className="col-span-3 font-mono"
+                  className="font-mono"
                   placeholder="ENTER NEW PLATE NUMBER"
                 />
               </div>

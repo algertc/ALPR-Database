@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LogViewer from "./LogViewer";
 import DashboardLayout from "@/components/layout/MainLayout";
+import { getVersionInfo } from "@/lib/version";
 
 async function LogsContent() {
   unstable_noStore();
@@ -21,13 +22,18 @@ async function LogsContent() {
   return <LogViewer initialLogs={logs} />;
 }
 
-export default function LogsPage() {
+export default async function LogsPage() {
+  const version = await getVersionInfo();
+
   return (
     <DashboardLayout>
       <div className="flex flex-col py-4 px-6">
-        <div className="container flex h-14 items-center">
-          <div className="flex items-center mb-3">
+        <div className="flex h-14 items-center px-2">
+          <div className="flex w-full justify-between items-center mb-3">
             <h1 className="text-2xl font-medium">System Logs</h1>
+            <h3 className=" text-muted-foreground">
+              Release: {version.current}
+            </h3>
           </div>
         </div>
         <Suspense
