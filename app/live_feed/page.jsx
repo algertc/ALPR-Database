@@ -1,3 +1,4 @@
+// app/dashboard/plates/page.jsx
 import {
   getSettings,
   getLatestPlateReads,
@@ -6,7 +7,7 @@ import {
   getTimeFormat,
 } from "@/app/actions";
 
-import PlateTableWrapper from "@/components/PlateTableWrapper";
+import PlateTableWrapper from "@/components/PlateTableWrapper"; // Correct path to wrapper
 import DashboardLayout from "@/components/layout/MainLayout";
 import BasicTitle from "@/components/layout/BasicTitle";
 import { Suspense } from "react";
@@ -15,10 +16,13 @@ import Link from "next/link";
 import TitleNavbar from "@/components/layout/LiveFeedNav";
 
 import { Button } from "@/components/ui/button";
+import { unstable_noStore as noStore } from "next/cache";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"; // Ensures data is fetched on every request
 
 export default async function LivePlates(props) {
+  noStore(); // Opt-out of data caching for this component and its data fetches
+
   const searchParams = await props.searchParams;
 
   const params = {
@@ -55,33 +59,6 @@ export default async function LivePlates(props) {
   return (
     <DashboardLayout>
       <TitleNavbar title="ALPR Recognition Feed">
-        {/* <BasicTitle
-        title="ALPR Recognition Feed"
-        recording={true}
-        subtitle={
-          "Monitor and manage the traffic on your ALPR system in real time."
-        }
-      >
-        <div className="flex gap-2 items-center">
-          <Link href="/live_feed">
-            <Button
-              variant="outline"
-              size="sm"
-              className={usePathname === "/live_feed" ? "bg-muted" : ""}
-            >
-              Table View
-            </Button>
-          </Link>
-          <Link href="/live_feed/viewer">
-            <Button
-              variant="outline"
-              size="sm"
-              className={pathname === "/live_feed/viewer" ? "bg-muted" : ""}
-            >
-              Live Viewer
-            </Button>
-          </Link>
-        </div> */}
         <Suspense fallback={<LiveFeedSkeleton />}>
           <PlateTableWrapper
             data={platesRes.data}
@@ -89,7 +66,7 @@ export default async function LivePlates(props) {
             tags={tagsRes.success ? tagsRes.data : []}
             cameras={camerasRes.success ? camerasRes.data : []}
             timeFormat={timeFormat}
-            biHost={config?.blueiris?.host} // Add this line
+            biHost={config?.blueiris?.host}
           />
         </Suspense>
       </TitleNavbar>

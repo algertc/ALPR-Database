@@ -1,29 +1,35 @@
 import { NextResponse } from "next/server";
 
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|grid.svg).*)"],
+  runtime: "nodejs", // Keeping this as discussed, assumes Node.js runtime for middleware is feasible
+};
+
 export async function middleware(request) {
   console.log(
     `${request.method} ${request.nextUrl.pathname}${request.nextUrl.search}`
   );
 
-  // Allow public paths (but login will be handled specially below)
   const publicPaths = [
     "/_next",
     "/favicon.ico",
-    "/api/plate-reads", // API auth handled in the route itself
+    "/api/plate-reads",
     "/api/verify-session",
     "/api/health-check",
     "/api/verify-key",
     "/api/verify-whitelist",
     "/api/check-update",
-    "/update",
     "/api/test",
+    "/update",
     "/180.png",
     "/512.png",
     "/192.png",
     "/1024.png",
+    "/grid.svg",
+    "/manifest.webmanifest",
+    "/login",
   ];
 
-  // Check for API key in query parameters for iframe embeds (insecure)
   const url = new URL(request.url);
   const queryApiKey = url.searchParams.get("api_key");
 
@@ -31,55 +37,36 @@ export async function middleware(request) {
     try {
       const response = await fetch(new URL("/api/verify-key", request.url), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey: queryApiKey }),
-        signal: AbortSignal.timeout(5000), // Add timeout
+        signal: AbortSignal.timeout(5000),
       });
 
       const result = await response.json();
       if (result.valid) {
-        // Create a new response that preserves the API key in all internal links
         const res = NextResponse.next();
-
-        // Rewrite the request URL to include the API key
-        const rewrittenUrl = new URL(request.url);
-        if (!rewrittenUrl.searchParams.has("api_key")) {
-          rewrittenUrl.searchParams.set("api_key", queryApiKey);
-        }
-
-        // Set a header that your frontend can use to maintain the API key
         res.headers.set("x-api-key", queryApiKey);
-
         return res;
       }
     } catch (error) {
       console.error("API key verification error:", error);
-      // Continue with normal auth flow instead of failing
     }
   }
 
-  // Handle non-login public paths
   if (publicPaths.some((path) => request.nextUrl.pathname.startsWith(path))) {
     if (request.nextUrl.pathname === "/api/plates") {
       const authHeader = request.headers.get("Authorization");
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return new Response("Unauthorized", { status: 401 });
       }
-
       const apiKey = authHeader.replace("Bearer ", "");
-
       try {
         const response = await fetch(new URL("/api/verify-key", request.url), {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ apiKey }),
-          signal: AbortSignal.timeout(5000), // Add timeout
+          signal: AbortSignal.timeout(5000),
         });
-
         if (!response.ok) {
           return new Response("Invalid API Key", { status: 401 });
         }
@@ -88,28 +75,28 @@ export async function middleware(request) {
         return new Response("Internal Server Error", { status: 500 });
       }
     }
-
     return NextResponse.next();
   }
 
-  // Get session cookie
-  const session = request.cookies.get("session");
+  // --- REFINED SESSION COOKIE CHECK ---
+  const sessionCookie = request.cookies.get("session");
+  const sessionId = sessionCookie ? sessionCookie.value : null; // Explicitly get value or null
+
+  console.log(
+    `Middleware checking path: ${request.nextUrl.pathname}, Session ID from cookie: ${sessionId}`
+  );
 
   // SPECIAL HANDLING FOR LOGIN PAGE
   if (request.nextUrl.pathname === "/login") {
-    // If user has a session, verify it and redirect to home if valid
-    if (session?.value) {
+    if (sessionId) {
+      // Check if sessionId exists
       try {
         const response = await fetch(
           new URL("/api/verify-session", request.url),
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              sessionId: session.value,
-            }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sessionId }), // Pass sessionId directly
             signal: AbortSignal.timeout(5000),
           }
         );
@@ -125,81 +112,73 @@ export async function middleware(request) {
         }
       } catch (error) {
         console.error("Session verification error on login page:", error);
-        // If verification fails, clear the invalid session and allow login
         const res = NextResponse.next();
-        res.cookies.delete("session");
+        res.cookies.delete("session"); // Clear potentially invalid session
         return res;
       }
     }
-
-    // No session or invalid session - allow access to login page
-    return NextResponse.next();
+    return NextResponse.next(); // No valid session, allow access to login page
   }
 
   // For all other protected routes, check authentication
-  if (!session) {
-    // Check IP whitelist with proper error handling
+  if (!sessionId) {
+    // Now this check should correctly reflect if a session ID was found
+    console.log(
+      "No session ID found in cookie. Checking IP whitelist or redirecting to login."
+    );
+    // Check IP whitelist (existing logic, kept as is)
     try {
       const isWhitelistedIpResponse = await fetch(
         new URL("/api/verify-whitelist", request.url),
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             ip: request.ip,
             headers: Object.fromEntries(request.headers),
           }),
-          signal: AbortSignal.timeout(5000), // Add timeout
+          signal: AbortSignal.timeout(5000),
         }
       );
 
       if (isWhitelistedIpResponse.ok) {
         const isWhitelistedIp = (await isWhitelistedIpResponse.json()).allowed;
         if (isWhitelistedIp) {
+          console.log("IP whitelisted, allowing access.");
           return NextResponse.next();
         }
       }
     } catch (error) {
       console.error("IP whitelist check error:", error);
-      // Continue to login redirect if whitelist check fails
     }
 
-    console.log("No session cookie block run");
+    console.log("No session or IP not whitelisted, redirecting to /login.");
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // Session verification with improved error handling
+  // Session verification for protected routes
   try {
     const response = await fetch(new URL("/api/verify-session", request.url), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        sessionId: session.value,
-      }),
-      signal: AbortSignal.timeout(5000), // Add timeout
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId }), // Pass sessionId directly
+      signal: AbortSignal.timeout(5000),
     });
 
-    // If the request failed due to network/server issues, allow access
-    // This prevents random logouts due to temporary server problems
     if (!response.ok) {
-      console.error(`Session verification request failed: ${response.status}`);
-
-      // Only redirect to login for client errors (4xx), not server errors (5xx)
+      console.error(
+        `Session verification request failed: ${response.status} for path: ${request.nextUrl.pathname}`
+      );
       if (response.status >= 400 && response.status < 500) {
         console.log(
-          "Client error during session verification, redirecting to login"
+          "Client error during session verification, redirecting to login and clearing cookie."
         );
         const res = NextResponse.redirect(new URL("/login", request.url));
         res.cookies.delete("session");
         return res;
       } else {
-        // For server errors (5xx), allow access to prevent random logouts
         console.log(
-          "Server error during session verification, allowing access"
+          "Server error during session verification, allowing access to prevent random logouts."
         );
         return NextResponse.next();
       }
@@ -208,23 +187,20 @@ export async function middleware(request) {
     const result = await response.json();
 
     if (!result.valid) {
-      console.log("Invalid session, clearing cookie");
+      console.log(
+        "Invalid session for protected route, clearing cookie and redirecting to login."
+      );
       const res = NextResponse.redirect(new URL("/login", request.url));
       res.cookies.delete("session");
       return res;
     }
 
-    // After authentication succeeds, check for required updates
-    // Only check on main app pages, not API routes
     if (!request.nextUrl.pathname.startsWith("/api/")) {
       try {
         const updateResponse = await fetch(
           new URL("/api/check-update", request.url),
-          {
-            signal: AbortSignal.timeout(5000), // Add timeout
-          }
+          { signal: AbortSignal.timeout(5000) }
         );
-
         if (updateResponse.ok) {
           const updateData = await updateResponse.json();
           if (updateData.updateRequired) {
@@ -233,30 +209,20 @@ export async function middleware(request) {
         }
       } catch (error) {
         console.error("Update check error:", error);
-        // Continue if update check fails - don't block user access
       }
     }
-
     return NextResponse.next();
   } catch (error) {
-    console.error("Session verification error:", error);
-
-    // CRITICAL FIX: Don't redirect to login on network errors
-    // Only redirect if it's clearly an authentication issue
+    console.error("Session verification fetch error in middleware:", error);
     if (error.name === "AbortError") {
       console.log(
-        "Session verification timeout, allowing access to prevent logout"
+        "Session verification timeout, allowing access to prevent logout."
       );
-      return NextResponse.next();
+    } else {
+      console.log(
+        "Network error during session verification, allowing access."
+      );
     }
-
-    // For other network errors, also allow access
-    console.log("Network error during session verification, allowing access");
     return NextResponse.next();
   }
 }
-
-export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
-  runtime: "nodejs",
-};

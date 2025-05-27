@@ -62,10 +62,12 @@ import { createHash } from "crypto";
 import { execSync } from "child_process";
 import { getConfig, saveConfig } from "@/lib/settings";
 import {
-  getAuthConfig,
-  updateAuthConfig,
-  hashPassword,
   createSession,
+  invalidateSession,
+  verifyPassword, // The function that handles both old/new hashes
+  hashPasswordBcrypt, // New export to create a bcrypt hash
+  getAuthConfig, // Need this to update config
+  updateAuthConfig, // Need this to save updated config
 } from "@/lib/auth";
 import { formatTimeRange } from "@/lib/utils";
 import path from "path";
@@ -191,12 +193,12 @@ export async function deletePlateFromDB(formData) {
 export async function deletePlateRead(formData) {
   console.log("Deleting plate recognition");
   try {
-    const plateNumber = formData.get("plateNumber");
-    await removePlateRead(plateNumber);
+    const id = formData.get("id"); // use ID
+    await removePlateRead(id);
     return { success: true };
   } catch (error) {
-    console.error("Error removing known plate:", error);
-    return { success: false, error: "Failed to remove plate" };
+    console.error("Error removing plate read:", error); // Clarified error message
+    return { success: false, error: "Failed to remove plate read" };
   }
 }
 
@@ -579,8 +581,10 @@ export async function updateNotificationPriority(formData) {
   }
 }
 
+const SESSION_EXPIRATION_SECONDS = 24 * 60 * 60;
+
 export async function loginAction(formData) {
-  console.log("Logging in user");
+  console.log("Attempting login...");
   const password = formData.get("password");
 
   if (!password) {
@@ -588,40 +592,78 @@ export async function loginAction(formData) {
   }
 
   try {
-    const config = await getAuthConfig();
+    const config = await getAuthConfig(); // Get current config to check hash type
+    const storedHash = config.password;
 
-    // Verify password
-    if (hashPassword(password) !== config.password) {
+    const isPasswordValid = await verifyPassword(password); // This verifies against whatever hash type is stored
+
+    if (!isPasswordValid) {
       console.log("Invalid password attempt");
       return { error: "Invalid password" };
     }
 
-    // Get user agent properly in Next.js 15
+    // --- Password Migration Logic ---
+    // If the stored password is an old SHA256 hash (doesn't start with '$2'),
+    // re-hash the provided plaintext password to bcrypt and save it.
+    if (!storedHash.startsWith("$2")) {
+      console.log("Old SHA256 password verified. Migrating to bcrypt...");
+      const newBcryptHash = await hashPasswordBcrypt(password);
+      config.password = newBcryptHash;
+      await updateAuthConfig(config); // Save the updated config with the new hash
+      console.log("Password successfully migrated to bcrypt.");
+    }
+    // --- End Password Migration Logic ---
+
     const headersList = await headers();
     const userAgent = headersList.get("user-agent") || "Unknown Device";
 
-    // Create new session with user agent
     const sessionId = await createSession(userAgent);
     console.log("Created session ID:", sessionId);
 
-    // Set cookie
     const cookieStore = await cookies();
     cookieStore.set("session", sessionId, {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: SESSION_EXPIRATION_SECONDS,
+      path: "/",
     });
 
-    // Verify cookie was set
-    const checkCookie = cookieStore.get("session");
-    console.log("Cookie after setting:", checkCookie);
-
-    return { success: true };
+    redirect("/");
   } catch (error) {
     console.error("Login error:", error);
-    return { error: "An error occurred during login" };
+
+    if (
+      error &&
+      typeof error.digest === "string" &&
+      error.digest.startsWith("NEXT_REDIRECT")
+    ) {
+      throw error;
+    }
+
+    return { error: "An unexpected error occurred during login" };
   }
+}
+
+export async function logoutAction() {
+  "use server";
+
+  const cookieStore = await cookies();
+  const sessionId = cookieStore.get("session")?.value;
+
+  if (sessionId) {
+    await invalidateSession(sessionId);
+  }
+
+  cookieStore.set("session", "", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
+
+  redirect("/login");
 }
 
 export async function getSettings() {
@@ -750,19 +792,59 @@ export async function updateSettings(formData) {
   }
 }
 
-export async function updatePassword(newPassword) {
-  try {
-    const updatedPassword = hashPassword(newPassword);
-    const config = await getAuthConfig();
-    await updateAuthConfig({
-      ...config,
-      password: updatedPassword,
-    });
+export async function updatePassword(formData) {
+  const currentPassword = formData.get("currentPassword");
+  const newPassword = formData.get("newPassword");
+  const confirmPassword = formData.get("confirmPassword");
 
-    revalidatePath("/settings");
-    return { success: true };
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return { error: "All password fields are required." };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { error: "New password and confirmation do not match." };
+  }
+
+  if (newPassword.length < 8) {
+    // Example: enforce minimum password length
+    return { error: "New password must be at least 8 characters long." };
+  }
+
+  try {
+    // 1. Verify the current password using the dedicated function
+    const isCurrentPasswordValid = await verifyPassword(currentPassword);
+    if (!isCurrentPasswordValid) {
+      return { error: "Incorrect current password." };
+    }
+
+    // 2. Hash the new password using the dedicated function
+    const newHashedPassword = await hashPasswordBcrypt(newPassword);
+
+    // 3. Get the current auth config, update the password, and save it
+    const config = await getAuthConfig();
+    if (!config) {
+      // This case should ideally not happen if getAuthConfig is robust
+      return { error: "Authentication configuration could not be loaded." };
+    }
+    config.password = newHashedPassword;
+    await updateAuthConfig(config); // Persist the change
+
+    // 4. Invalidate all sessions for security after password change
+    // This will force all existing users to re-login with the new password.
+    const currentSessions = Object.keys(config.sessions); // Get session IDs before clearing
+    // It's more efficient to clear the sessions in memory and then write once.
+    config.sessions = {}; // Clear all sessions
+    await updateAuthConfig(config); // Save the cleared sessions along with the new password
+
+    console.log("Password updated successfully and all sessions invalidated.");
+    return {
+      success: true,
+      message:
+        "Password updated successfully. All active sessions have been logged out.",
+    };
   } catch (error) {
-    return { success: false, error: error.message };
+    console.error("Error updating password:", error);
+    return { error: "An error occurred while changing password." };
   }
 }
 

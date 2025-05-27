@@ -411,7 +411,7 @@ export default function PlateTable({
 
   const handleDeleteSubmit = async () => {
     if (!activePlate) return;
-    await onDeleteRecord(activePlate.plate_number);
+    await onDeleteRecord(activePlate.id); //fix use id
     setIsDeleteConfirmOpen(false);
   };
 
@@ -426,10 +426,11 @@ export default function PlateTable({
     formData.append("removePrevious", correction.removePlate.toString());
 
     await onCorrectPlate(formData);
-    setSelectedImage((prev) => ({
-      ...prev,
-      plateNumber: correction.newPlateNumber,
-    }));
+    selectedImage &&
+      setSelectedImage((prev) => ({
+        ...prev,
+        plateNumber: correction.newPlateNumber,
+      }));
     setCorrection(null);
     setIsCorrectPlateOpen(false);
   };
@@ -1873,16 +1874,22 @@ export default function PlateTable({
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid items-center gap-4">
+              {/* Current Plate Input */}
+              <div className="grid w-full items-center gap-2">
+                {" "}
+                {/* Added w-full and changed gap-4 to gap-2 for tighter label/input spacing */}
                 <Label htmlFor="current-plate">Current</Label>
                 <Input
                   id="current-plate"
                   value={correction?.plateNumber || ""}
                   disabled
-                  className="font-mono"
+                  className="font-mono text-base p-2 h-10 w-full" // Increased text size, padding, height, and added w-full
                 />
               </div>
-              <div className="grid items-center gap-4 mb-4">
+              {/* New Plate Input */}
+              <div className="grid w-full items-center gap-2 mb-4">
+                {" "}
+                {/* Added w-full and changed gap-4 to gap-2 */}
                 <Label htmlFor="new-plate">New</Label>
                 <Input
                   id="new-plate"
@@ -1893,10 +1900,11 @@ export default function PlateTable({
                       newPlateNumber: e.target.value.toUpperCase(),
                     }))
                   }
-                  className="font-mono"
+                  className="font-mono text-base p-2 h-10 w-full" // Increased text size, padding, height, and added w-full
                   placeholder="ENTER NEW PLATE NUMBER"
                 />
               </div>
+              {/* Switches */}
               <div className="flex items-center space-x-2">
                 <Switch
                   id="correct-all"

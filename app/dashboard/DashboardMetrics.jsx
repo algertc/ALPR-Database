@@ -25,6 +25,7 @@ import {
   HoverCardTrigger,
   HoverCardContent,
 } from "@/components/ui/hover-card";
+import { SiGoogledocs } from "react-icons/si";
 
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import {
@@ -387,6 +388,13 @@ export default function DashboardMetrics() {
           </h1>
           <div className="flex gap-4 text-xl mt-2 sm:mt-0">
             <Link
+              href="https://www.alprdatabase.org/docs"
+              target="_blank"
+              aria-label="GitHub"
+            >
+              <SiGoogledocs className="hover:text-blue-500" />
+            </Link>
+            <Link
               href="https://github.com/algertc/ALPR-Database"
               target="_blank"
               aria-label="GitHub"
@@ -421,7 +429,7 @@ export default function DashboardMetrics() {
       </div>
 
       {loading && (
-        <div className="absolute w-full h-svh dark:bg-[#0e0e10]/70  backdrop-blur-md rounded-xl flex flex-col items-center justify-center text-center space-y-4 z-20">
+        <div className="absolute w-full h-svh dark:bg-black/60  backdrop-blur-md rounded-xl flex flex-col items-center justify-center text-center space-y-4 z-20">
           <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto"></div>
           <div className="space-y-2">
             <h3 className="text-lg font-medium text-foreground">

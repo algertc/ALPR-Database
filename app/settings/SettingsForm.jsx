@@ -40,6 +40,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import ToggleSwitch from "@/components/ui/toggle-switch";
+import { SecuritySettings } from "./SecuritySettings";
 
 const navigation = [
   { title: "General", id: "general" },
@@ -54,12 +55,18 @@ const navigation = [
 ];
 
 export default function SettingsForm({ initialSettings, initialApiKey }) {
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [isPending, startTransition] = useTransition(); // For general settings
+  const [error, setError] = useState(""); // General error for main form
+  const [success, setSuccess] = useState(false); // General success for main form
   const [activeSection, setActiveSection] = useState("general");
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false); // This is local state for general form (will be managed by SecuritySettings itself now)
+  const [showDialog, setShowDialog] = useState(false); // This is local state for general form (will be managed by SecuritySettings itself now)
+
+  // `handlePasswordSubmit` and `handleRegenerateApiKey` in THIS component (`SettingsForm`)
+  // are the ones directly attached to the form in the `renderSecuritySection` function
+  // of the original code you provided.
+  // We need to keep these handlers exactly as they were, but ensure they call the
+  // `updatePassword` and `regenerateApiKey` server actions correctly.
 
   const handleSettingsSubmit = async (formData) => {
     setError("");
@@ -140,42 +147,85 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
   };
 
   const handlePasswordSubmit = async (event) => {
-    event.preventDefault();
-    setError("");
+    // This handler is local to SettingsForm.jsx
+    event.preventDefault(); // Prevent default form submission
+    setError(""); // Use parent's error state
+    setSuccess(false); // Use parent's success state
 
-    const formData = new FormData(event.target);
+    const formData = new FormData(event.target); // Correctly create FormData from event.target
 
     if (formData.get("newPassword") !== formData.get("confirmPassword")) {
-      setError("Passwords do not match");
+      setError("Passwords do not match"); // Set parent's error state
       return;
     }
 
+    // Use the main `startTransition` from `SettingsForm` for password changes.
+    // This implies `isPending` will cover both general settings and security.
+    // If you need separate loading states, you would add a new `useTransition` here.
     startTransition(async () => {
-      const result = await updatePassword(formData.get("newPassword"));
+      // <--- CRUCIAL FIX: Pass the entire formData object
+      const result = await updatePassword(formData);
       if (result.success) {
-        setSuccess(true);
-        event.target.reset();
+        setSuccess(true); // Set parent's success state
+        event.target.reset(); // Reset the form in SecuritySettings via this event
       } else {
-        setError(result.error);
+        setError(result.error); // Set parent's error state
       }
     });
   };
 
   const handleRegenerateApiKey = async () => {
-    setError("");
+    // This handler is local to SettingsForm.jsx
+    setError(""); // Use parent's error state
+    setSuccess(false); // Use parent's success state
+
+    // Use the main `startTransition` from `SettingsForm` for API key regeneration.
     startTransition(async () => {
       const result = await regenerateApiKey();
       if (result.success) {
-        setShowDialog(false);
-        setSuccess(true);
+        setShowDialog(false); // This local state needs to be managed for this dialog
+        setSuccess(true); // Set parent's success state
+        // The SecuritySettings component would need to receive the new API key
+        // to update its display. This means initialApiKey should be `currentApiKey`
+        // and updated here. See renderSecuritySection below.
       } else {
-        setError(result.error);
+        setError(result.error); // Set parent's error state
+      }
+    });
+  };
+
+  // State to manage API key display in SecuritySettings, updated by regenerateApiKey
+  const [currentApiKeyInForm, setCurrentApiKeyInForm] = useState(initialApiKey);
+
+  // When API key is regenerated in handleRegenerateApiKey:
+  // - result.apiKey should be set to currentApiKeyInForm
+  // - setShowDialog(false) to close the dialog
+
+  // Re-write handleRegenerateApiKey to update currentApiKeyInForm
+  const handleRegenerateApiKeyInSettingsForm = async () => {
+    setError("");
+    setSuccess(false); // Clear general success
+    const dialogWasOpen = showDialog; // Capture dialog state before action
+
+    startTransition(async () => {
+      try {
+        const result = await regenerateApiKey();
+        if (result.success) {
+          setCurrentApiKeyInForm(result.apiKey); // Update state for SecuritySettings
+          if (dialogWasOpen) setShowDialog(false); // Close dialog if it was open
+          setSuccess(true); // Set general success
+          setTimeout(() => setSuccess(false), 3000); // Clear after 3 seconds
+        } else {
+          setError(result.error); // Set general error
+        }
+      } catch (e) {
+        setError("An unexpected error occurred during API key regeneration.");
+        console.error("API key regeneration client-side error:", e);
       }
     });
   };
 
   const renderGeneralSection = () => (
-    // Add key to force re-render when section changes
     <div key="general-section" className="space-y-4">
       <h3 className="text-lg font-semibold">General Settings</h3>
       <div className="space-y-2">
@@ -192,7 +242,7 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="maxRecords">Image Retention Period (Months)</Label>
+        <Label htmlFor="retention">Image Retention Period (Months)</Label>
         <Input
           id="retention"
           name="retention"
@@ -211,36 +261,8 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
           ]}
           name="timeFormat"
           defaultValue={initialSettings.general.timeFormat}
-          // onChange={(value) => setTimeFormat(value)}
         />
       </div>
-      {/* <div className="space-y-2">
-        <Label htmlFor="timeFormat">Time Format</Label>
-        <div className="flex items-center space-x-2">
-          <Select
-            defaultValue={initialSettings.general.timeFormat || "24"}
-            name="timeFormat"
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select time format" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="12">12-hour</SelectItem>
-              <SelectItem value="24">24-hour</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div> */}
-      {/* <div className="flex items-center space-x-2">
-        <Checkbox
-          id="ignoreNonPlate"
-          name="ignoreNonPlate"
-          defaultChecked={initialSettings.general.ignoreNonPlate}
-        />
-        <Label htmlFor="ignoreNonPlate">
-          Ignore non-plate number OCR reads
-        </Label>
-      </div> */}
     </div>
   );
 
@@ -355,7 +377,6 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
               autoCapitalize="off"
               spellCheck="false"
               data-form-type="other"
-              // Use a random name attribute to further prevent autofill
               {...{ "data-lpignore": "true" }}
             />
           </div>
@@ -461,98 +482,12 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
   );
 
   const renderSecuritySection = () => (
-    <div className="space-y-8">
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Change Password</h3>
-        <form onSubmit={handlePasswordSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="currentPassword">Current Password</Label>
-            <Input
-              id="currentPassword"
-              name="currentPassword"
-              type="password"
-              required
-              autoComplete="current-password"
-            />
-          </div>
-          <div>
-            <Label htmlFor="newPassword">New Password</Label>
-            <Input
-              id="newPassword"
-              name="newPassword"
-              type="password"
-              required
-              autoComplete="new-password"
-            />
-          </div>
-          <div>
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
-            <Input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              required
-              autoComplete="new-password"
-            />
-          </div>
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Changing..." : "Change Password"}
-          </Button>
-        </form>
-      </div>
-
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">API Key Management</h3>
-        <div>
-          <Label>Current API Key</Label>
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Input
-                readOnly
-                value={initialApiKey}
-                type={showApiKey ? "text" : "password"}
-                autoComplete="off"
-              />
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => setShowApiKey(!showApiKey)}
-              size="icon"
-            >
-              {showApiKey ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
-                <Eye className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-
-        <Dialog open={showDialog} onOpenChange={setShowDialog}>
-          <DialogTrigger asChild>
-            <Button variant="destructive">Regenerate API Key</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Regenerate API Key</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to regenerate the API key? This will
-                invalidate the current key and any systems using it will need to
-                be updated.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowDialog(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleRegenerateApiKey}>
-                Regenerate
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </div>
+    // This section renders the SecuritySettings child component
+    // It passes `initialApiKey` directly as it's the `initial` prop.
+    // The SecuritySettings component now manages its own `apiKey` state internally.
+    <SecuritySettings
+      initialApiKey={currentApiKeyInForm} // Pass the dynamically updated API key
+    />
   );
 
   const renderPrivacySection = () => (
@@ -739,6 +674,7 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
               </Card>
             </form>
           ) : (
+            // This is the card that contains the SecuritySettings component
             <Card className="transition-shadow hover:shadow-lg">
               <CardHeader>
                 <CardTitle>Security Settings</CardTitle>
@@ -746,7 +682,10 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
                   Manage your security settings and API keys
                 </CardDescription>
               </CardHeader>
-              <CardContent className="p-6">{renderSection()}</CardContent>
+              <CardContent className="p-6">
+                {/* Render the SecuritySettings section, which is the child component */}
+                {renderSection()}
+              </CardContent>
             </Card>
           )}
         </main>

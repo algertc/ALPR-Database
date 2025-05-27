@@ -1,7 +1,7 @@
+// app/login/page.js
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { loginAction } from "@/app/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,25 +10,25 @@ import { Shield, Loader2 } from "lucide-react";
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const router = useRouter();
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setError("");
+    setError(""); // Clear previous errors
 
     const formData = new FormData(event.target);
 
     startTransition(async () => {
       try {
         const result = await loginAction(formData);
-        if (result.error) {
+
+        if (result && result.error) {
           setError(result.error);
-        } else if (result.success) {
-          router.push("/");
         }
       } catch (e) {
-        setError("An error occurred during login");
-        console.error("Login error:", e);
+        setError(
+          "An unexpected error occurred during login. Please try again."
+        );
+        console.error("Login client-side error:", e);
       }
     });
   }
@@ -63,15 +63,15 @@ export default function LoginPage() {
               className="space-y-4 sm:space-y-6"
               autoComplete="on"
             >
-              {/* Hidden username field for better password manager support */}
-              <input
+              {/* HIDDEN FIELD FOR AUTOFULL HEURISTICS */}
+              <Input
+                id="username_hidden" // Unique ID
+                name="username_hidden" // Unique name
                 type="text"
-                name="username"
-                value="admin"
-                autoComplete="username"
-                style={{ display: "none" }}
-                readOnly
-                tabIndex={-1}
+                autoComplete="username" // Crucial for username autofill context
+                style={{ display: "none", opacity: 0, height: 0, width: 0 }} // Visually hide it completely
+                aria-hidden="true" // Hide from screen readers
+                tabIndex="-1" // Make it non-focusable
               />
 
               <div className="space-y-2">
