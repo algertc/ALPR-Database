@@ -22,7 +22,7 @@ function removeSseClient(clientId) {
 
 // Exported function for other parts of the server (like the POST handler)
 // to send events to all connected SSE clients.
-export function sendSseEventToAll(event, data) {
+function sendSseEventToAll(event, data) {
   const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
   sseClients.forEach((client) => {
     try {
@@ -119,5 +119,5 @@ export async function GET(req) {
   });
 
   // Return a promise that never resolves, so the connection stays open indefinitely
-  return new Promise(() => {});
+  return new Promise(() => { });
 }

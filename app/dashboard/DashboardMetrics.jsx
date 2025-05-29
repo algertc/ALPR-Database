@@ -688,7 +688,7 @@ export default function DashboardMetrics() {
             ) : (
               <div className="flex flex-col items-center justify-center xl:py-12 px-4 text-center">
                 <div className="relative mb-6">
-                  <img className="w-12 h-12 dark:invert" src="/alpr_icon.svg" />
+                  <Image className="w-12 h-12 dark:invert" src="/alpr_icon.svg" alt="ALPR icon"/>
                 </div>
                 <div className="space-y-3 max-w-sm">
                   <h3 className="text-lg font-semibold text-foreground">

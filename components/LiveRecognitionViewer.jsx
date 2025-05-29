@@ -401,7 +401,7 @@ export default function LiveRecognitionViewer({
                               overflow: "hidden",
                             }}
                           >
-                            <img
+                            <Image
                               src={getImageSrc(latestPlate)}
                               alt={`License plate ${latestPlate.plate_number}`}
                               style={{

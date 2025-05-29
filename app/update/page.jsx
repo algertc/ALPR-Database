@@ -177,7 +177,7 @@ export default function SystemUpdatePage() {
                   step={2}
                   title="Image Migration"
                   description="Convert base64 image data to files and store file paths in database"
-                  icon={<Image className="h-6 w-6" />}
+                  icon={<Image className="h-6 w-6" alt="Image Migration"/>}
                   isComplete={step2Complete}
                   isDisabled={!step1Complete}
                 >
