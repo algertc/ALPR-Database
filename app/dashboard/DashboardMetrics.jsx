@@ -29,12 +29,6 @@ import { SiGoogledocs } from "react-icons/si";
 
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import {
-  fetchPlateImagePreviews,
-  getCameraNames,
-  getDashboardMetrics,
-  getTimeFormat,
-} from "@/app/actions";
-import {
   TrendingUp,
   Car,
   Eye,
@@ -55,6 +49,7 @@ import { FaRoad, FaGithub, FaDocker } from "react-icons/fa";
 import CameraReadsChart from "./CameraChart";
 import { CameraSelector } from "./CameraSelect";
 import { DashboardSkeleton } from "@/components/DashboardSkeleton";
+import { getDashboardMetrics, getCameraNames, getTimeFormat } from "@/actions";
 
 export function formatTimeRange(hour, timeFormat) {
   if (timeFormat === 24) {
@@ -252,13 +247,10 @@ export default function DashboardMetrics() {
             startDate.setDate(endDate.getDate() - 1);
         }
 
-        const args = [timeZone, startDate, endDate];
-        if (selectedCamera && selectedCamera !== "all") {
-          args.push(selectedCamera);
-        }
+        const cameraName = selectedCamera && selectedCamera !== "all" ? selectedCamera : null;
 
         const [data, config] = await Promise.all([
-          getDashboardMetrics(...args),
+          getDashboardMetrics(timeZone, startDate, endDate, cameraName),
           getTimeFormat(),
         ]);
 
@@ -688,7 +680,7 @@ export default function DashboardMetrics() {
             ) : (
               <div className="flex flex-col items-center justify-center xl:py-12 px-4 text-center">
                 <div className="relative mb-6">
-                  <Image className="w-12 h-12 dark:invert" src="/alpr_icon.svg" alt="ALPR icon"/>
+                  <Image className="w-12 h-12 dark:invert" src="/alpr_icon.svg" alt="ALPR icon" width={12} height={12}/>
                 </div>
                 <div className="space-y-3 max-w-sm">
                   <h3 className="text-lg font-semibold text-foreground">

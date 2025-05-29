@@ -3,8 +3,7 @@ import { checkPlateForNotification } from "@/lib/db";
 import { sendPushoverNotification } from "@/lib/notifications";
 import { getAuthConfig } from "@/lib/auth";
 import { getConfig } from "@/lib/settings";
-import { revalidatePlatesPage } from "@/app/actions";
-import { revalidatePath } from "next/cache";
+import { revalidatePlatesPage } from "@/actions";
 import fileStorage from "@/lib/fileStorage";
 
 // Revised to use a blacklist of all other possible AI labels if using the memo

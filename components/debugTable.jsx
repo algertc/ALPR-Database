@@ -5,7 +5,7 @@ import { Search } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { getLatestPlateReads } from '@/app/actions';
+import { getLatestPlateReads } from '@/actions';
 
 export default function PlateTable({ initialData }) {
   // Initialize with the data directly since it's an array

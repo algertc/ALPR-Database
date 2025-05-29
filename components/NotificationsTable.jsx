@@ -5,7 +5,7 @@ import {
   toggleNotification,
   deleteNotification,
   updateNotificationPriority,
-} from "@/app/actions";
+} from "@/actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {

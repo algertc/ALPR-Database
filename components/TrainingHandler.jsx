@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { processTrainingData } from "@/app/actions";
+import { processTrainingData } from "@/actions";
 
 export function TrainingDataHandler() {
   useEffect(() => {

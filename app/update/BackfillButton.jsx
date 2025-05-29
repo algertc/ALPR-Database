@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { dbBackfill } from "../actions";
+import { Button } from "@/components/ui/button";
+import { dbBackfill } from "@/actions";
 
 export function BackfillButton({ onComplete }) {
   const [response, setResponse] = useState("");

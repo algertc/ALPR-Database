@@ -1,5 +1,5 @@
 import SettingsForm from "./SettingsForm";
-import { getSettings } from "@/app/actions";
+import { getSettings } from "@/actions";
 import { getAuthConfig } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";

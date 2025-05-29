@@ -2,11 +2,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { loginAction } from "@/app/actions";
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Shield, Loader2 } from "lucide-react";
-import Image from "next/image";
+import { loginAction } from "@/actions";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -40,6 +40,8 @@ export default function LoginPage() {
         src="/grid.svg"
         className="absolute bottom-0 w-full -z-10 invert"
         alt="Background grid"
+        width={24}
+        height={24}
       />
 
       <div className="w-full max-w-md px-6 sm:px-8 z-10">

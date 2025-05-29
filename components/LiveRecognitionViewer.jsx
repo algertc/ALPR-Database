@@ -21,7 +21,7 @@ import {
   Car,
   BarChart3,
 } from "lucide-react";
-import { getLatestPlateReads, fetchPlateInsights } from "@/app/actions";
+import { getLatestPlateReads, fetchPlateInsights } from "@/actions";
 
 export default function LiveRecognitionViewer({
   latestPlate: initialPlate,

@@ -25,9 +25,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { getTags, addTag, removeTag, updateTag } from "@/app/actions";
 import DashboardLayout from "@/components/layout/MainLayout";
 import TitleNavbar from "@/components/layout/TitleNav";
+import { getTags, addTag, removeTag, updateTag } from "@/actions";
 import { cn } from "@/lib/utils";
 
 const TagDialog = ({

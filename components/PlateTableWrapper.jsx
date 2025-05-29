@@ -10,7 +10,7 @@ import {
   tagPlate,
   untagPlate,
   validatePlateRecord,
-} from "@/app/actions";
+} from "@/actions";
 
 export default function PlateTableWrapper({
   data, // Initial data from server component (props from page.jsx)

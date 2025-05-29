@@ -16,7 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 // Correctly import server actions. Note: UpdatePassword was named updatePassword in actions.js
-import { updatePassword, regenerateApiKey } from "@/app/actions";
+import { updatePassword, regenerateApiKey } from "@/actions";
 
 export function SecuritySettings({ initialApiKey }) {
   const [apiKey, setApiKey] = useState(initialApiKey); // State to display dynamically updated API Key

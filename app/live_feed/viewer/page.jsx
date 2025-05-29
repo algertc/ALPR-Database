@@ -1,10 +1,4 @@
-import {
-  getSettings,
-  getLatestPlateReads,
-  getTags,
-  getCameraNames,
-  getTimeFormat,
-} from "@/app/actions";
+import { getCameraNames, getTimeFormat, getSettings, getLatestPlateReads, getTags } from "@/actions";
 
 import DashboardLayout from "@/components/layout/MainLayout";
 import TitleNavbar from "@/components/layout/LiveFeedNav";

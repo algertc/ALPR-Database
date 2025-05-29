@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { unstable_noStore } from "next/cache";
-import { getSystemLogs } from "@/app/actions";
+import { getSystemLogs } from "@/actions";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LogViewer from "./LogViewer";
