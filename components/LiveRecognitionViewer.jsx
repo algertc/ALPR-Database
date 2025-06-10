@@ -21,7 +21,7 @@ import {
   Car,
   BarChart3,
 } from "lucide-react";
-import { getLatestPlateReads, fetchPlateInsights } from "@/app/actions";
+import { getLatestPlateReads, fetchPlateInsights } from "@/actions";
 
 export default function LiveRecognitionViewer({
   latestPlate: initialPlate,
@@ -401,7 +401,7 @@ export default function LiveRecognitionViewer({
                               overflow: "hidden",
                             }}
                           >
-                            <img
+                            <Image
                               src={getImageSrc(latestPlate)}
                               alt={`License plate ${latestPlate.plate_number}`}
                               style={{

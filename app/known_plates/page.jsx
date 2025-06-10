@@ -1,7 +1,7 @@
-import { getKnownPlatesList } from "@/app/actions";
 import { KnownPlatesTable } from "@/components/KnownPlatesTable";
 import DashboardLayout from "@/components/layout/MainLayout";
 import BasicTitle from "@/components/layout/BasicTitle";
+import { getKnownPlatesList } from "@/actions";
 
 export const dynamic = "force-dynamic";
 

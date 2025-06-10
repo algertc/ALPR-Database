@@ -48,17 +48,13 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-  getPlates,
   getTags,
   addKnownPlate,
   tagPlate,
   untagPlate,
   deletePlate,
-  fetchPlateInsights,
-  getKnownPlatesList,
-  deletePlateFromDB,
   toggleIgnorePlate,
-} from "@/app/actions";
+} from "@/actions";
 
 export function KnownPlatesTable({ initialData }) {
   const [data, setData] = useState(initialData);

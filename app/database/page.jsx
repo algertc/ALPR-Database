@@ -1,7 +1,7 @@
 import DashboardLayout from "@/components/layout/MainLayout";
 import TitleNavbar from "@/components/layout/TitleNav";
 import PlateDbTable from "@/components/plateDbTable";
-import { getPlates } from "@/app/actions";
+import { getPlates } from "@/actions";
 
 export default async function Database() {
   let plateReads = [];

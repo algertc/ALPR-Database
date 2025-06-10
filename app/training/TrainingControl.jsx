@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { generateTrainingData } from "@/app/actions";
+import { generateTrainingData } from "@/actions";
 
 export function TrainingControl() {
   const [isGenerating, setIsGenerating] = useState(false);

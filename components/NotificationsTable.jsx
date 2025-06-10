@@ -5,7 +5,7 @@ import {
   toggleNotification,
   deleteNotification,
   updateNotificationPriority,
-} from "@/app/actions";
+} from "@/actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -185,8 +185,7 @@ export function NotificationsTable({ initialData }) {
               <DialogHeader>
                 <DialogTitle>Add Notification Plate</DialogTitle>
                 <DialogDescription>
-                  Enter a license plate number to receive notifications when
-                  it's detected.
+                  {"Enter a license plate number to receive notifications when it's detected."}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAdd}>

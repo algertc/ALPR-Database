@@ -22,7 +22,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import Image from "next/image";
-import { fetchPlateInsights } from "@/app/actions";
+import { fetchPlateInsights } from "@/actions";
 
 export function formatTimeRange(hour, timeFormat) {
   if (timeFormat === 24) {

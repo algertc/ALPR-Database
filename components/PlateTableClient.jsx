@@ -11,7 +11,7 @@ import {
   deletePlateRead,
   tagPlate,
   untagPlate,
-} from "@/app/actions";
+} from "@/actions";
 
 export default function PlateTableClient({
   data,

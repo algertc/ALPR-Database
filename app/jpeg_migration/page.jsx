@@ -10,7 +10,7 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { migrateImageDataToFiles, clearImageData } from "@/app/actions";
+import { migrateImageDataToFiles, clearImageData } from "@/actions";
 
 export const dynamic = "force-dynamic";
 

@@ -79,7 +79,7 @@ import { format } from "date-fns";
 import { Switch } from "@/components/ui/switch";
 import { useRouter } from "next/navigation";
 import PlateImage from "@/components/PlateImage";
-import { getSettings } from "@/app/actions";
+import { getSettings } from "@/actions";
 import ImageViewer from "./ImageViewer";
 import {
   Sheet,

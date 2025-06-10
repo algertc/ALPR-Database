@@ -7,7 +7,7 @@ import {
   getLatestPlateReads,
   getTags,
   getTimeFormat,
-} from "@/app/actions";
+} from "@/actions";
 
 export default async function LiveFeedTable(props) {
   const searchParams = await props.searchParams;

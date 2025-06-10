@@ -1,11 +1,5 @@
 // app/dashboard/plates/page.jsx
-import {
-  getSettings,
-  getLatestPlateReads,
-  getTags,
-  getCameraNames,
-  getTimeFormat,
-} from "@/app/actions";
+import { getCameraNames, getTimeFormat, getSettings, getLatestPlateReads, getTags } from "@/actions";
 
 import PlateTableWrapper from "@/components/PlateTableWrapper"; // Correct path to wrapper
 import DashboardLayout from "@/components/layout/MainLayout";

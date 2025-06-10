@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { sendMetricsUpdate } from "@/app/actions";
+import { sendMetricsUpdate } from "@/actions";
 
 export function MetricsHandler() {
   useEffect(() => {
