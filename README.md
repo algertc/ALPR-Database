@@ -6,7 +6,7 @@
 
 <h4 align="center">A Fully-Featured Automated License Plate Recognition Database for Blue Iris + CodeProject AI Server</h4>
 
-[![Feature Requests & Roadmap](https://img.shields.io/badge/Feature%20Requests%20&%20Roadmap-5e5ced?style=for-the-badge&logo=starship&logoColor=white&link=https://alprdatabase.featurebase.app/roadmap)](https://alprdatabase.featurebase.app/roadmap) [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-1D63ED?style=for-the-badge&logo=Docker&logoColor=white&link=https://hub.docker.com/r/algertc/alpr-dashboard)](https://hub.docker.com/r/algertc/alpr-dashboard) ![Plates Processed](https://img.shields.io/badge/Plates%20Processed-8M+-00A1E0?style=for-the-badge&logo=CodeForces&logoColor=white) ![Release](https://img.shields.io/github/v/release/algertc/ALPR-Database?style=for-the-badge&logoColor=white)
+[![Feature Requests & Roadmap](https://img.shields.io/badge/Feature%20Requests%20&%20Roadmap-5e5ced?style=for-the-badge&logo=starship&logoColor=white&link=https://alprdatabase.featurebase.app/roadmap)](https://alprdatabase.featurebase.app/roadmap) [![Docker Hub](https://img.shields.io/badge/Docker%20Hub-1D63ED?style=for-the-badge&logo=Docker&logoColor=white&link=https://hub.docker.com/r/algertc/alpr-dashboard)](https://hub.docker.com/r/algertc/alpr-dashboard) ![Plates Processed](https://img.shields.io/badge/Plates%20Processed-100M+-00A1E0?style=for-the-badge&logo=CodeForces&logoColor=white) ![Release](https://img.shields.io/github/v/release/algertc/ALPR-Database?style=for-the-badge&logoColor=white)
 
 <h4 align="center">
 ⭐ Please star the repository if you find the project useful ⭐</h4>
