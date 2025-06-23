@@ -170,9 +170,13 @@ export async function POST(req) {
     // Handle AI dump format if present
     if (data.ai_dump) {
       try {
-        const aiData = Array.isArray(data.ai_dump)
-          ? data.ai_dump[0]
-          : data.ai_dump;
+        const aiDumpArray = Array.isArray(data.ai_dump)
+          ? data.ai_dump
+          : [data.ai_dump];
+
+        // Find the ALPR response in the ai_dump array
+        const aiData = aiDumpArray.find((item) => item?.api === "alpr");
+
         if (aiData?.found?.predictions) {
           // Get all plate annotations for this batch
           const allPlateAnnotations = aiData.found.predictions
