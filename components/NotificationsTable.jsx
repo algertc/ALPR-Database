@@ -186,7 +186,7 @@ export function NotificationsTable({ initialData }) {
                 <DialogTitle>Add Notification Plate</DialogTitle>
                 <DialogDescription>
                   Enter a license plate number to receive notifications when
-                  it's detected.
+                  it&apos;s detected.
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleAdd}>
