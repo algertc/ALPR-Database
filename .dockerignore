@@ -17,3 +17,4 @@ update.sh
 config/*
 logs/*
 auth/*
+storage/*
