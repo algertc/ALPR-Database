@@ -11,12 +11,14 @@ const LogMessage = ({ log }) => {
   };
 
   return (
-    <div className="py-1 font-mono text-sm">
-      <span className="text-muted-foreground">
+    <div className="grid grid-cols-12 gap-4 py-2 border-b border-border/30 last:border-b-0">
+      <div className="col-span-9 font-mono text-sm flex items-center">
+        <span className={getLogColor(log.level)}>[{log.level}]</span>{" "}
+        <span className="text-foreground ml-2">{log.message}</span>
+      </div>
+      <div className="col-span-3 text-right text-muted-foreground font-mono text-sm">
         {new Date(log.timestamp).toLocaleString()}
-      </span>{" "}
-      <span className={getLogColor(log.level)}>[{log.level}]</span>{" "}
-      <span className="text-foreground">{log.message}</span>
+      </div>
     </div>
   );
 };

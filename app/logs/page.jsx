@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import { unstable_noStore } from "next/cache";
 import { getSystemLogs } from "@/app/actions";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LogViewer from "./LogViewer";
 import DashboardLayout from "@/components/layout/MainLayout";
@@ -13,7 +12,7 @@ async function LogsContent() {
 
   if (error) {
     return (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="mx-6">
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -27,24 +26,29 @@ export default async function LogsPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col py-4 px-6">
-        <div className="flex h-14 items-center px-2">
-          <div className="flex w-full justify-between items-center mb-3">
-            <h1 className="text-2xl font-medium">System Logs</h1>
-            <h3 className=" text-muted-foreground">
+      <div className="flex flex-col h-full">
+        {/* Header - Fixed height */}
+        <div className="flex-shrink-0 border-b bg-background">
+          <div className="flex h-16 items-center justify-between px-6">
+            <h1 className="text-lg font-medium text-foreground">System Logs</h1>
+            <span className="text-sm text-muted-foreground">
               Release: {version.current}
-            </h3>
+            </span>
           </div>
         </div>
-        <Suspense
-          fallback={
-            <div className="flex justify-center p-8">
-              <div className="animate-spin rounded-full w-8 h-8 border-b-2 border-primary" />
-            </div>
-          }
-        >
-          <LogsContent />
-        </Suspense>
+
+        {/* Content - Takes remaining height */}
+        <div className="flex-1 min-h-0">
+          <Suspense
+            fallback={
+              <div className="flex justify-center items-center h-full">
+                <div className="animate-spin rounded-full w-8 h-8 border-b-2 border-primary" />
+              </div>
+            }
+          >
+            <LogsContent />
+          </Suspense>
+        </div>
       </div>
     </DashboardLayout>
   );

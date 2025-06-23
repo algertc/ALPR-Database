@@ -974,7 +974,7 @@ export async function getSystemLogs() {
             // Try parsing as Winston JSON format
             const parsed = JSON.parse(line);
             return {
-              timestamp: new Date(parsed.timestamp).toLocaleString(),
+              timestamp: parsed.timestamp,
               level: parsed.level.toUpperCase(),
               // Strip ANSI color codes
               message: parsed.message.replace(/\u001b\[\d+m/g, ""),
