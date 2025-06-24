@@ -8,40 +8,7 @@
 // platforms, this in-memory solution will NOT work across instances.
 // You would need a distributed pub/sub system (Redis, Pusher, etc.) instead.
 
-// Global in-memory store for SSE clients. This persists across requests
-// in a single Node.js process (your Docker container).
-let sseClients = [];
-let nextClientId = 0; // Simple unique ID for clients
-
-function removeSseClient(clientId) {
-  sseClients = sseClients.filter((client) => client.id !== clientId);
-  console.log(
-    `[SSE] Client ${clientId} disconnected. Total clients: ${sseClients.length}`
-  );
-}
-
-// Exported function for other parts of the server (like the POST handler)
-// to send events to all connected SSE clients.
-export function sendSseEventToAll(event, data) {
-  const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-  sseClients.forEach((client) => {
-    try {
-      client.res.write(payload);
-    } catch (e) {
-      console.error(
-        `[SSE] Error writing to client ${client.id}, removing:`,
-        e.message
-      );
-      // Clean up client if writing fails (indicates disconnection)
-      removeSseClient(client.id);
-      try {
-        client.res.end(); // Attempt to gracefully end the broken connection
-      } catch (endErr) {
-        /* ignore */
-      }
-    }
-  });
-}
+import { addSseClient, removeSseClient } from "@/lib/sse";
 
 // GET handler for Server-Sent Events
 export async function GET(req) {
@@ -71,11 +38,7 @@ export async function GET(req) {
   // Send HTTP 200 OK headers
   res.writeHead(200);
 
-  const clientId = nextClientId++;
-  sseClients.push({ id: clientId, res });
-  console.log(
-    `[SSE] Client ${clientId} connected. Total clients: ${sseClients.length}`
-  );
+  const clientId = addSseClient(res);
 
   // Send an initial heartbeat to confirm connection and prevent immediate timeouts
   res.write(

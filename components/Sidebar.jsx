@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ChatButton } from "@/components/chat/ChatButton";
 import {
   LayoutDashboard,
   Database,
@@ -106,6 +107,7 @@ export function Sidebar() {
           </nav>
           <div className="flex flex-col items-center pb-4 space-y-2">
             <ThemeToggle />
+            <ChatButton />
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <Button

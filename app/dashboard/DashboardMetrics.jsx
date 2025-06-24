@@ -726,7 +726,7 @@ export default function DashboardMetrics() {
                       <Database className="w-4 h-4 text-green-500" />
                     </div>
                     <p className="text-xs text-muted-foreground text-center">
-                      Track Growth
+                      Track Vehicles
                     </p>
                   </div>
                 </div>
