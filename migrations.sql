@@ -18,6 +18,20 @@ ALTER TABLE IF EXISTS public.plate_reads
     ADD COLUMN IF NOT EXISTS bi_zone varchar(30),
     ADD COLUMN IF NOT EXISTS validated boolean DEFAULT false;
 
+
+-- Please for the love of god work...
+-- Fix in reference to #57 and ipct reports about db config on new installs
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'plates_pkey' 
+        AND conrelid = 'public.plates'::regclass
+    ) THEN
+        ALTER TABLE public.plates ADD CONSTRAINT plates_pkey PRIMARY KEY (plate_number);
+    END IF;
+END $$;
+
 -- Modify known_plates
 ALTER TABLE IF EXISTS public.known_plates 
     ADD COLUMN IF NOT EXISTS ignore BOOLEAN DEFAULT FALSE;

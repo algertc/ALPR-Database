@@ -381,9 +381,9 @@ export default function DashboardMetrics() {
   return (
     <div className="relative space-y-4">
       {/* Header - Made responsive */}
-      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start pt-4 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start pt-2 border-b gap-4">
         <div className="flex flex-col sm:flex-row sm:gap-8 items-center sm:items-baseline mb-2 sm:mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold">
+          <h1 className="text-2xl font-semibold text-foreground">
             License Plate Dashboard
           </h1>
           <div className="flex gap-4 text-xl mt-2 sm:mt-0">
@@ -402,7 +402,7 @@ export default function DashboardMetrics() {
               <FaGithub className="hover:text-blue-500" />
             </Link>
             <Link
-              href="https://hub.docker.com/repository/docker/algertc/alpr-dashboard"
+              href="https://hub.docker.com/r/algertc/alpr-dashboard"
               target="_blank"
               aria-label="Docker"
             >
@@ -444,9 +444,9 @@ export default function DashboardMetrics() {
       )}
 
       {/* Main charts - Made responsive */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Time Distribution Chart */}
-        <Card className="h-full md:max-h-[600px] 2xl:max-h-[800px] flex flex-col dark:bg-[#0e0e10]">
+        <Card className="h-full md:max-h-[600px] 2xl:max-h-[800px] flex flex-col dark:bg-[#0e0e10] rounded-lg">
           <CardHeader>
             <CardTitle>Time Distribution</CardTitle>
             <CardDescription>
@@ -576,7 +576,7 @@ export default function DashboardMetrics() {
         </Card>
 
         {/* Top 10 Plates Card */}
-        <Card className="max-h-[750px] md:max-h-[600px] 2xl:max-h-[800px] overflow-auto dark:bg-[#0e0e10]">
+        <Card className="max-h-[750px] md:max-h-[600px] 2xl:max-h-[800px] overflow-auto dark:bg-[#0e0e10] rounded-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
               Top 10 Plates
@@ -726,7 +726,7 @@ export default function DashboardMetrics() {
                       <Database className="w-4 h-4 text-green-500" />
                     </div>
                     <p className="text-xs text-muted-foreground text-center">
-                      Track Vehicles
+                      Track Growth
                     </p>
                   </div>
                 </div>
@@ -743,7 +743,7 @@ export default function DashboardMetrics() {
       </div>
 
       {/* Bottom section - Made responsive */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         {/* Metrics Grid */}
         <div className="xl:col-span-8 grid grid-rows-auto gap-4">
           <div className="grid grid-cols-1 xs:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -799,7 +799,7 @@ export default function DashboardMetrics() {
 
 function MetricCard({ title, value, icon, description, loading }) {
   return (
-    <Card className="dark:bg-[#0e0e10]">
+    <Card className="dark:bg-[#0e0e10] rounded-lg">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6">
         <CardTitle className="text-xs sm:text-sm font-medium">
           {title}

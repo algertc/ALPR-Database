@@ -60,7 +60,7 @@ export function TagDistributionChart({ data, loading }) {
   };
 
   return (
-    <Card className="dark:bg-[#0e0e10] h-full">
+    <Card className="dark:bg-[#0e0e10] h-full rounded-lg">
       <CardHeader className="pb-2 sm:pb-6">
         <CardTitle className="text-xl sm:text-2xl">Tag Distribution</CardTitle>
         <CardDescription className="text-xs sm:text-sm">
@@ -82,7 +82,7 @@ export function TagDistributionChart({ data, loading }) {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
                       return (
-                        <div className="rounded-lg border bg-background p-2 shadow-sm">
+                        <div className="rounded-md border bg-background p-2 shadow-sm">
                           <div className="grid grid-cols-2 gap-2">
                             <div className="flex flex-col">
                               <span className="text-[0.70rem] uppercase text-muted-foreground">
