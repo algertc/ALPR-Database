@@ -40,19 +40,26 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Install PostgreSQL Client and Run Migrations
+      - name: Install PostgreSQL Client and Setup Database
         run: |
           # Install PostgreSQL client
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-          # Run migrations (they are idempotent with IF NOT EXISTS)
+          # Run schema first to create base tables
+          echo "Creating database schema..."
+          psql $DATABASE_URL -f schema.sql || {
+            echo "❌ Database schema creation failed"
+            exit 1
+          }
+
+          # Run migrations for any updates
           echo "Running database migrations..."
           psql $DATABASE_URL -f migrations.sql || {
             echo "❌ Database migrations failed"
             exit 1
           }
-          echo "✅ Database migrations completed successfully"
+          echo "✅ Database setup completed successfully"
 
       - name: Test Database Extensions
         run: |
