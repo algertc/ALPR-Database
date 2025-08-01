@@ -2,9 +2,7 @@ name: Health Check
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   health-check:
