@@ -6,6 +6,7 @@ import { loginAction } from "@/app/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Shield, Loader2 } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const [error, setError] = useState("");
@@ -35,10 +36,13 @@ export default function LoginPage() {
 
   return (
     <div className="h-[100dvh] flex flex-col items-center justify-center bg-gradient-to-b from-background to-background/95 overflow-hidden">
-      <img
+      <Image
         src="/grid.svg"
         className="absolute bottom-0 w-full -z-10 invert"
         alt="Background grid"
+        width={1920}
+        height={1080}
+        priority
       />
 
       <div className="w-full max-w-md px-6 sm:px-8 z-10">

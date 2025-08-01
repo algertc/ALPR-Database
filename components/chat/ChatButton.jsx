@@ -20,7 +20,7 @@ export function ChatButton() {
         <TooltipTrigger asChild>
           <Button
             variant="ghost"
-            onClick={toggleChat}
+            // onClick={toggleChat}
             className={cn(
               "w-10 h-10 p-0 hover:bg-transparent [&:not(:disabled)]:hover:bg-transparent",
               isChatOpen ? "text-blue-500" : "hover:text-blue-500"
@@ -31,7 +31,7 @@ export function ChatButton() {
         </TooltipTrigger>
         <TooltipContent side="right" className="border-0 bg-muted">
           <div className="text-center">
-            <p>AI Assistant</p>
+            <p>AI Assistant (Coming Soon!)</p>
             <p className="text-xs text-muted-foreground mt-1">
               Press ⌘K or Ctrl+K
             </p>

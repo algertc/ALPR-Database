@@ -118,3 +118,27 @@ WHERE NOT EXISTS (SELECT 1 FROM devmgmt);
 
 ALTER TABLE IF EXISTS public.devmgmt
     ADD COLUMN IF NOT EXISTS training_last_record INTEGER DEFAULT 0;
+
+
+CREATE TABLE IF NOT EXISTS mqttbrokers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    broker VARCHAR(255),
+    port INTEGER DEFAULT 1883,
+    topic VARCHAR(255),
+    username VARCHAR(255),
+    password VARCHAR(255),
+    use_tls BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS mqttnotifications (
+    id SERIAL PRIMARY KEY,
+    plate_number VARCHAR(50),
+    name VARCHAR(255),
+    enabled BOOLEAN DEFAULT TRUE,
+    brokerid INTEGER REFERENCES mqttbrokers(id) ON DELETE CASCADE,
+    message TEXT,
+    includeKnownPlateInfo BOOLEAN DEFAULT TRUE
+);
+
+

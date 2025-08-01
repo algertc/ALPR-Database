@@ -753,12 +753,9 @@ export function KnownPlatesTable({ initialData }) {
               Add a new license plate to the known plates database
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="plateNumber"
-                className="text-right sm:text-left col-span-4 sm:col-span-1"
-              >
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <Label htmlFor="plateNumber" className="w-auto text-nowrap">
                 Plate Number
               </Label>
               <Input
@@ -771,15 +768,12 @@ export function KnownPlatesTable({ initialData }) {
                   })
                 }
                 required
-                className="col-span-4 sm:col-span-3"
+                className=""
                 placeholder="ABC123"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="newName"
-                className="text-right sm:text-left col-span-4 sm:col-span-1"
-              >
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <Label htmlFor="newName" className="">
                 Name
               </Label>
               <Input
@@ -792,14 +786,11 @@ export function KnownPlatesTable({ initialData }) {
                   })
                 }
                 required
-                className="col-span-4 sm:col-span-3"
+                className=""
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label
-                htmlFor="newNotes"
-                className="text-right sm:text-left col-span-4 sm:col-span-1"
-              >
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <Label htmlFor="newNotes" className="">
                 Notes
               </Label>
               <Textarea

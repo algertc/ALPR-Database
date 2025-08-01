@@ -39,6 +39,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import DashboardLayout from "@/components/layout/MainLayout";
+import { MqttBrokerManager } from "@/components/MqttBrokerManager";
 import {
   updateSettings,
   updatePassword,
@@ -308,42 +309,8 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
   );
 
   const renderMqttSection = () => (
-    <div key="mqtt-section" className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-foreground mb-2">
-          MQTT Configuration
-        </h2>
-        <p className="text-muted-foreground">
-          Configure MQTT broker settings for plate detection events.
-          (Deprecated)
-        </p>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-3xl">
-        <div className="space-y-2">
-          <Label htmlFor="mqttBroker" className="text-sm font-medium">
-            MQTT Broker URL/IP
-          </Label>
-          <Input
-            id="mqttBroker"
-            name="mqttBroker"
-            defaultValue={initialSettings.mqtt.broker}
-            placeholder="mqtt://example.com"
-            autoComplete="off"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="mqttTopic" className="text-sm font-medium">
-            MQTT Topic
-          </Label>
-          <Input
-            id="mqttTopic"
-            name="mqttTopic"
-            defaultValue={initialSettings.mqtt.topic}
-            placeholder="alpr/plates"
-            autoComplete="off"
-          />
-        </div>
-      </div>
+    <div key="mqtt-section">
+      <MqttBrokerManager />
     </div>
   );
 
@@ -836,7 +803,7 @@ export default function SettingsForm({ initialSettings, initialApiKey }) {
               )}
 
               {/* Form Content */}
-              {activeSection !== "security" ? (
+              {activeSection !== "security" && activeSection !== "mqtt" ? (
                 <form action={handleSettingsSubmit}>
                   <div className="space-y-8">
                     {renderSection()}

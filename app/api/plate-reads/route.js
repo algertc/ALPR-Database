@@ -1,6 +1,10 @@
 import { cleanupOldRecords, getPool, isPlateIgnored } from "@/lib/db";
-import { checkPlateForNotification } from "@/lib/db";
+import {
+  checkPlateForNotification,
+  checkPlateForMqttNotification,
+} from "@/lib/db";
 import { sendPushoverNotification } from "@/lib/notifications";
+import { sendMqttNotificationByPlate } from "@/lib/mqtt-client";
 import { getAuthConfig } from "@/lib/auth";
 import { getConfig } from "@/lib/settings";
 import { revalidatePlatesPage } from "@/app/actions";
@@ -258,6 +262,32 @@ export async function POST(req) {
           null,
           data.Image
         );
+      }
+
+      // Check MQTT notifications
+      const shouldMqttNotify = await checkPlateForMqttNotification(
+        plateData.plate_number
+      );
+      if (shouldMqttNotify) {
+        try {
+          const mqttResult = await sendMqttNotificationByPlate(
+            plateData.plate_number,
+            {
+              ...plateData,
+              imageData: data.Image,
+              camera_name: camera,
+              timestamp: timestamp,
+            }
+          );
+          if (mqttResult.success && mqttResult.sent > 0) {
+            console.log(
+              `Sent ${mqttResult.sent} MQTT notification(s) for plate ${plateData.plate_number}`
+            );
+          }
+        } catch (error) {
+          console.error("Error sending MQTT notifications:", error);
+          // Don't fail the entire request if MQTT fails
+        }
       }
 
       const isIgnored = await isPlateIgnored(plateData.plate_number);

@@ -9,7 +9,7 @@ export default function Component({
   navigation = [
     { title: "Database", href: "/database" },
     { title: "Tags", href: "/database/tags" },
-    { title: "Download", href: "/database/#" },
+    { title: "Download", href: "/download" },
   ],
   children,
 }) {

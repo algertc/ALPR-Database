@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|grid.svg).*)"],
-  runtime: "nodejs", // Keeping this as discussed, assumes Node.js runtime for middleware is feasible
+  runtime: "nodejs",
 };
 
 export async function middleware(request) {
@@ -27,7 +27,6 @@ export async function middleware(request) {
     "/1024.png",
     "/grid.svg",
     "/manifest.webmanifest",
-    "/login",
   ];
 
   const url = new URL(request.url);
@@ -109,6 +108,7 @@ export async function middleware(request) {
             );
             return NextResponse.redirect(new URL("/", request.url));
           }
+          return NextResponse.next();
         }
       } catch (error) {
         console.error("Session verification error on login page:", error);

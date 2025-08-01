@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   addNotificationPlate,
   toggleNotification,
@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Trash2, Bell, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const priorityOptions = [
   { value: -2, label: "Lowest", description: "No notification or alert" },
@@ -52,6 +53,11 @@ export function NotificationsTable({ initialData }) {
   const [plateToDelete, setPlateToDelete] = useState(null);
   const [testStatus, setTestStatus] = useState(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  // Update data when initialData prop changes (after revalidation)
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -173,52 +179,6 @@ export function NotificationsTable({ initialData }) {
             Create Notification
           </Button>
         </form> */}
-        <div className="flex justify-end items-center">
-          <Button
-            onClick={() => setIsAddDialogOpen(true)}
-            className="mb-4 w-fit"
-          >
-            Add Notification Plate
-          </Button>
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Add Notification Plate</DialogTitle>
-                <DialogDescription>
-                  Enter a license plate number to receive notifications when
-                  it&apos;s detected.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleAdd}>
-                <div className="py-4">
-                  <Input
-                    placeholder="Enter plate number..."
-                    value={newPlate}
-                    onChange={(e) => setNewPlate(e.target.value.toUpperCase())}
-                    className="w-full"
-                    autoFocus
-                  />
-                </div>
-                <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsAddDialogOpen(false)}
-                    className="w-full sm:w-auto order-2 sm:order-1"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="w-full sm:w-auto order-1 sm:order-2"
-                  >
-                    Add Plate
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
 
         {testStatus && (
           <Alert
@@ -235,15 +195,15 @@ export function NotificationsTable({ initialData }) {
         )}
 
         {/* Desktop Table View */}
-        <div className="rounded-md border dark:bg-[#0e0e10] px-2 hidden sm:block">
+        <div className="rounded-md border dark:bg-[#0e0e10] hidden sm:block">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Plate Number</TableHead>
+                <TableHead className="pl-4">Plate Number</TableHead>
                 <TableHead>Tags</TableHead>
-                <TableHead>Notifications</TableHead>
+                <TableHead>Priority</TableHead>
                 <TableHead>Active</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -256,7 +216,7 @@ export function NotificationsTable({ initialData }) {
               ) : (
                 data.map((plate) => (
                   <TableRow key={plate.plate_number}>
-                    <TableCell className="font-medium font-mono">
+                    <TableCell className="font-medium font-mono pl-4">
                       {plate.plate_number}
                     </TableCell>
                     <TableCell>
@@ -317,8 +277,8 @@ export function NotificationsTable({ initialData }) {
                         }
                       />
                     </TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
+                    <TableCell className="text-right">
+                      <div className="flex gap-2 justify-end">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -456,6 +416,49 @@ export function NotificationsTable({ initialData }) {
             ))
           )}
         </div>
+      </div>
+      <div className="flex justify-end items-center">
+        <Button onClick={() => setIsAddDialogOpen(true)} className="mb-4 w-fit">
+          Add Push Notification
+        </Button>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add Notification Plate</DialogTitle>
+              <DialogDescription>
+                Enter a license plate number to receive notifications when
+                it&apos;s detected.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAdd}>
+              <div className="py-4">
+                <Input
+                  placeholder="Enter plate number..."
+                  value={newPlate}
+                  onChange={(e) => setNewPlate(e.target.value.toUpperCase())}
+                  className="w-full"
+                  autoFocus
+                />
+              </div>
+              <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddDialogOpen(false)}
+                  className="w-full sm:w-auto order-2 sm:order-1"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="w-full sm:w-auto order-1 sm:order-2"
+                >
+                  Add Plate
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>

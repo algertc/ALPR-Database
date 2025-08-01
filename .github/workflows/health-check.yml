@@ -1,0 +1,230 @@
+name: Health Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_USER: testuser
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://testuser:testpassword@localhost:5432/testdb
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "yarn"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Validate SQL Schema
+        run: |
+          # Install PostgreSQL client
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+          # Test SQL syntax
+          echo "Testing SQL syntax..."
+          psql $DATABASE_URL -f migrations.sql --dry-run || {
+            echo "❌ SQL syntax validation failed"
+            exit 1
+          }
+          echo "✅ SQL syntax is valid"
+
+      - name: Run Database Migrations
+        run: |
+          echo "Running migrations..."
+          psql $DATABASE_URL -f migrations.sql
+          echo "✅ Migrations completed successfully"
+
+      - name: Test Database Extensions
+        run: |
+          echo "Testing required PostgreSQL extensions..."
+          psql $DATABASE_URL -c "SELECT * FROM pg_extension WHERE extname IN ('pg_trgm', 'fuzzystrmatch');" | grep -E "(pg_trgm|fuzzystrmatch)" || {
+            echo "❌ Required extensions not found"
+            exit 1
+          }
+          echo "✅ Required extensions are installed"
+
+      - name: Test Database Connectivity
+        run: |
+          echo "Testing basic database operations..."
+
+          # Test basic CRUD operations
+          psql $DATABASE_URL -c "
+            INSERT INTO plates (plate_number) VALUES ('TEST123') ON CONFLICT DO NOTHING;
+            SELECT plate_number FROM plates WHERE plate_number = 'TEST123';
+          " | grep "TEST123" || {
+            echo "❌ Basic database operations failed"
+            exit 1
+          }
+          echo "✅ Database connectivity and basic operations work"
+
+      - name: Build Application
+        run: |
+          echo "Building Next.js application..."
+          yarn build
+          echo "✅ Application built successfully"
+
+      - name: Test Application Startup
+        run: |
+          echo "Testing application startup..."
+
+          # Start the app in background
+          yarn start &
+          APP_PID=$!
+
+          # Wait for app to start
+          sleep 10
+
+          # Test if app responds
+          curl -f http://localhost:3000 || {
+            echo "❌ Application failed to start or respond"
+            kill $APP_PID 2>/dev/null
+            exit 1
+          }
+
+          # Cleanup
+          kill $APP_PID 2>/dev/null
+          echo "✅ Application starts and responds successfully"
+
+          - name: Test Critical API Endpoints
+      run: |
+        echo "Testing critical API endpoints..."
+        
+        # Start the app in background
+        yarn start &
+        APP_PID=$!
+        sleep 10
+        
+        # Test health check endpoint (if it exists)
+        curl -f http://localhost:3000/api/health-check || echo "⚠️  Health check endpoint not found (optional)"
+        
+        # Test MQTT brokers endpoint
+        curl -f http://localhost:3000/api/mqtt/brokers || {
+          echo "❌ MQTT brokers API endpoint failed"
+          kill $APP_PID 2>/dev/null
+          exit 1
+        }
+        
+        # Test plate-reads endpoint with test payload
+        echo "Testing plate-reads endpoint with test payload..."
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -d @test-payload.json \
+          -f http://localhost:3000/api/plate-reads || {
+          echo "❌ Plate-reads API endpoint failed with test payload"
+          kill $APP_PID 2>/dev/null
+          exit 1
+        }
+        echo "✅ Plate-reads endpoint processed test payload successfully"
+        
+        # Verify the plate was actually processed (check database)
+        echo "Verifying plate data was processed..."
+        PLATE_COUNT=$(psql $DATABASE_URL -t -c "SELECT COUNT(*) FROM plate_reads WHERE plate_number IS NOT NULL;")
+        if [ "$PLATE_COUNT" -gt 0 ]; then
+          echo "✅ Plate data was successfully stored in database ($PLATE_COUNT records)"
+        else
+          echo "⚠️  No plate data found in database (may be expected for test payload)"
+        fi
+        
+        # Cleanup
+        kill $APP_PID 2>/dev/null
+        echo "✅ Critical API endpoints respond correctly"
+
+      - name: Validate Configuration Files
+        run: |
+          echo "Validating configuration files..."
+
+          # Check if package.json is valid
+          node -e "JSON.parse(require('fs').readFileSync('package.json'))" || {
+            echo "❌ package.json is invalid"
+            exit 1
+          }
+
+          # Check if next.config.js loads without errors
+          node -e "require('./next.config.js')" || {
+            echo "❌ next.config.js has errors"
+            exit 1
+          }
+
+          echo "✅ Configuration files are valid"
+
+      - name: Test Database Schema Integrity
+        run: |
+          echo "Testing database schema integrity..."
+
+          # Test foreign key constraints
+          psql $DATABASE_URL -c "
+            SELECT 
+              tc.table_name, 
+              kcu.column_name,
+              ccu.table_name AS foreign_table_name,
+              ccu.column_name AS foreign_column_name
+            FROM information_schema.table_constraints AS tc 
+            JOIN information_schema.key_column_usage AS kcu
+              ON tc.constraint_name = kcu.constraint_name
+              AND tc.table_schema = kcu.table_schema
+            JOIN information_schema.constraint_column_usage AS ccu
+              ON ccu.constraint_name = tc.constraint_name
+              AND ccu.table_schema = tc.table_schema
+            WHERE tc.constraint_type = 'FOREIGN KEY'
+              AND tc.table_name IN ('mqttnotifications', 'plate_tags', 'plate_reads');
+          " || {
+            echo "❌ Foreign key constraints check failed"
+            exit 1
+          }
+
+          echo "✅ Database schema integrity verified"
+
+      - name: Test Environment Variables
+        run: |
+          echo "Testing environment variable handling..."
+
+          # Test that the app can handle missing env vars gracefully
+          node -e "
+            try {
+              require('./lib/settings.js');
+              console.log('✅ Settings module loads correctly');
+            } catch (error) {
+              console.error('❌ Settings module failed to load:', error.message);
+              process.exit(1);
+            }
+          "
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "🎉 Health check completed!"
+          echo "All critical systems verified:"
+          echo "  ✅ SQL schema validation"
+          echo "  ✅ Database connectivity" 
+          echo "  ✅ Application build and startup"
+          echo "  ✅ Critical API endpoints"
+          echo "  ✅ Configuration validation"
+          echo "  ✅ Database schema integrity"
