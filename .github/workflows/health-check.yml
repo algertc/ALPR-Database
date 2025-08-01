@@ -40,25 +40,19 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Validate SQL Schema
-        run: |
-          # Install PostgreSQL client
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-          # Test SQL syntax
-          echo "Testing SQL syntax..."
-          psql $DATABASE_URL -f migrations.sql --dry-run || {
-            echo "❌ SQL syntax validation failed"
-            exit 1
-          }
-          echo "✅ SQL syntax is valid"
-
-      - name: Run Database Migrations
-        run: |
-          echo "Running migrations..."
-          psql $DATABASE_URL -f migrations.sql
-          echo "✅ Migrations completed successfully"
+          - name: Install PostgreSQL Client and Run Migrations
+      run: |
+        # Install PostgreSQL client
+        sudo apt-get update
+        sudo apt-get install -y postgresql-client
+        
+        # Run migrations (they are idempotent with IF NOT EXISTS)
+        echo "Running database migrations..."
+        psql $DATABASE_URL -f migrations.sql || {
+          echo "❌ Database migrations failed"
+          exit 1
+        }
+        echo "✅ Database migrations completed successfully"
 
       - name: Test Database Extensions
         run: |
