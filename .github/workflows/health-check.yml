@@ -134,7 +134,7 @@ jobs:
             echo "❌ Plate-reads API endpoint failed with status: $HTTP_STATUS"
             kill $APP_PID 2>/dev/null
             exit 1
-          }
+          fi
 
           # Verify database connectivity with app running
           echo "Verifying database connectivity..."
