@@ -2,7 +2,7 @@ name: Health Check
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   health-check:
@@ -111,49 +111,46 @@ jobs:
           kill $APP_PID 2>/dev/null
           echo "✅ Application starts and responds successfully"
 
-          - name: Test Critical API Endpoints
-      run: |
-        echo "Testing critical API endpoints..."
-        
-        # Start the app in background
-        yarn start &
-        APP_PID=$!
-        sleep 10
-        
-        # Test health check endpoint (if it exists)
-        curl -f http://localhost:3000/api/health-check || echo "⚠️  Health check endpoint not found (optional)"
-        
-        # Test MQTT brokers endpoint
-        curl -f http://localhost:3000/api/mqtt/brokers || {
-          echo "❌ MQTT brokers API endpoint failed"
+      - name: Test Critical API Endpoints
+        run: |
+          echo "Testing critical API endpoints..."
+
+          # Start the app in background
+          yarn start &
+          APP_PID=$!
+          sleep 10
+
+          # Test MQTT brokers endpoint
+          curl -f http://localhost:3000/api/mqtt/brokers || {
+            echo "❌ MQTT brokers API endpoint failed"
+            kill $APP_PID 2>/dev/null
+            exit 1
+          }
+
+          # Test plate-reads endpoint with test payload
+          echo "Testing plate-reads endpoint with test payload..."
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d @test-payload.json \
+            -f http://localhost:3000/api/plate-reads || {
+            echo "❌ Plate-reads API endpoint failed with test payload"
+            kill $APP_PID 2>/dev/null
+            exit 1
+          }
+          echo "✅ Plate-reads endpoint processed test payload successfully"
+
+          # Verify the plate was actually processed (check database)
+          echo "Verifying plate data was processed..."
+          PLATE_COUNT=$(psql $DATABASE_URL -t -c "SELECT COUNT(*) FROM plate_reads WHERE plate_number IS NOT NULL;")
+          if [ "$PLATE_COUNT" -gt 0 ]; then
+            echo "✅ Plate data was successfully stored in database ($PLATE_COUNT records)"
+          else
+            echo "⚠️  No plate data found in database (may be expected for test payload)"
+          fi
+
+          # Cleanup
           kill $APP_PID 2>/dev/null
-          exit 1
-        }
-        
-        # Test plate-reads endpoint with test payload
-        echo "Testing plate-reads endpoint with test payload..."
-        curl -X POST \
-          -H "Content-Type: application/json" \
-          -d @test-payload.json \
-          -f http://localhost:3000/api/plate-reads || {
-          echo "❌ Plate-reads API endpoint failed with test payload"
-          kill $APP_PID 2>/dev/null
-          exit 1
-        }
-        echo "✅ Plate-reads endpoint processed test payload successfully"
-        
-        # Verify the plate was actually processed (check database)
-        echo "Verifying plate data was processed..."
-        PLATE_COUNT=$(psql $DATABASE_URL -t -c "SELECT COUNT(*) FROM plate_reads WHERE plate_number IS NOT NULL;")
-        if [ "$PLATE_COUNT" -gt 0 ]; then
-          echo "✅ Plate data was successfully stored in database ($PLATE_COUNT records)"
-        else
-          echo "⚠️  No plate data found in database (may be expected for test payload)"
-        fi
-        
-        # Cleanup
-        kill $APP_PID 2>/dev/null
-        echo "✅ Critical API endpoints respond correctly"
+          echo "✅ Critical API endpoints respond correctly"
 
       - name: Validate Configuration Files
         run: |
