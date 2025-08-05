@@ -32,9 +32,9 @@ export function ChatButton() {
         <TooltipContent side="right" className="border-0 bg-muted">
           <div className="text-center">
             <p>AI Assistant (Coming Soon!)</p>
-            <p className="text-xs text-muted-foreground mt-1">
+            {/* <p className="text-xs text-muted-foreground mt-1">
               Press ⌘K or Ctrl+K
-            </p>
+            </p> */}
           </div>
         </TooltipContent>
       </Tooltip>

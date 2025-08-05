@@ -274,7 +274,6 @@ export async function POST(req) {
             plateData.plate_number,
             {
               ...plateData,
-              imageData: data.Image,
               camera_name: camera,
               timestamp: timestamp,
             }
