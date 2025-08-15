@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.1.9] - 08-15-2025
+
+- Support for MQTT as plate notification for HA
+- Staged code for AI vehicle descriptions and deep research agent
+- More UI improvements
+- Database setup fixes
+- Improved session management
+- Improved management of known plates and flags
+- Error handling for non-plate objects in AI dump
+- Hardened integration tests
 
 ## [0.1.8] - 03-19-2025
 
@@ -13,7 +23,6 @@ See release notes for more detail on how to update the other systems: https://gi
 - Additional dashboard metrics
 - Several bug fixes and other improvements
 - Foundation for soon-to-come RF fingerprinting functionality
-
 
 ## [0.1.7] - 02-11-2025
 

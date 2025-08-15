@@ -1894,13 +1894,19 @@ export default function PlateTable({
                 <Input
                   id="new-plate"
                   value={correction?.newPlateNumber || ""}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setCorrection((curr) => ({
+                      ...curr,
+                      newPlateNumber: e.target.value,
+                    }));
+                  }}
+                  onBlur={(e) => {
                     setCorrection((curr) => ({
                       ...curr,
                       newPlateNumber: e.target.value.toUpperCase(),
-                    }))
-                  }
-                  className="font-mono text-base p-2 h-10 w-full" // Increased text size, padding, height, and added w-full
+                    }));
+                  }}
+                  className="font-mono text-base p-2 h-10 w-full uppercase" // Increased text size, padding, height, and added w-full
                   placeholder="ENTER NEW PLATE NUMBER"
                 />
               </div>

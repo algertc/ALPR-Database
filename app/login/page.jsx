@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { loginAction } from "@/app/actions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ import Image from "next/image";
 export default function LoginPage() {
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -24,6 +26,9 @@ export default function LoginPage() {
 
         if (result && result.error) {
           setError(result.error);
+        } else if (result && result.success) {
+          // Login successful, navigate to dashboard
+          router.push("/");
         }
       } catch (e) {
         setError(

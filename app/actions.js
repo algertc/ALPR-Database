@@ -52,6 +52,7 @@ import {
   editMqttNotification,
   toggleMqttNotificationEnabled,
   deleteMqttNotification,
+  addUnseenPlate,
 } from "@/lib/db";
 import {
   getNotificationPlates as getNotificationPlatesDB,
@@ -750,7 +751,7 @@ export async function loginAction(formData) {
       path: "/",
     });
 
-    redirect("/");
+    return { success: true };
   } catch (error) {
     console.error("Login error:", error);
 
@@ -1372,5 +1373,16 @@ export async function validatePlateRecord(readId, value) {
   } catch (error) {
     console.error("Error validating plate record:", error);
     return { success: false, error: "Failed to validate plate record" };
+  }
+}
+
+export async function addDBPlate(plate_number, flagged = false) {
+  try {
+    await addUnseenPlate(plate_number, flagged);
+    revalidatePath("/flagged");
+    return { success: true };
+  } catch (error) {
+    console.error("Error adding plate:", error);
+    return { success: false, error: "Failed to add plate" };
   }
 }
